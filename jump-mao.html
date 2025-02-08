@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Location Tracking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-image: url('background.jpeg'); /* Set background image */
+            background-size: cover; /* Cover the entire page */
+            background-position: center; /* Center the image */
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin-top: 30px;
+            font-weight: bold;
+            color: rgb(255, 255, 255); /* Make title black and bold */
+            font-size: 36px; /* Increase font size */
+            padding: 15px 30px;
+            background-color: #28a745; /* Greener color for Live Location Tracker box */
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        #map {
+            height: 500px;
+            width: 90%;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-container {
+            margin: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            margin: 15px;
+            transition: 0.3s;
+            color: white;
+            background: #007bff;
+        }
+
+        button:hover {
+            background: #0056b3; /* Darker blue when hovered */
+        }
+
+        #startTracking {
+            background: #28a745;
+        }
+
+        #startTracking:hover {
+            background: #218838;
+        }
+
+        #getDirections {
+            background: #007bff;
+        }
+
+        #getDirections:hover {
+            background: #0056b3;
+        }
+
+        #coordinates {
+            margin-top: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            color: black; /* Make coordinates text black */
+            background-color: rgba(255, 255, 255, 0.7); /* Light background for better contrast */
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            button {
+                font-size: 18px;
+                padding: 12px 25px;
+            }
+
+            #map {
+                width: 95%;
+                height: 400px;
+            }
+
+            #coordinates {
+                font-size: 18px;
+            }
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvAhRDojug00qPdWV7eR7TDR16cxDo928"></script>
+</head>
+<body>
+    <h1>Live Location Tracker</h1>
+    <div id="map"></div>
+    <div id="coordinates">Latitude: -- | Longitude: --</div>
+    <div class="btn-container">
+        <button id="startTracking">Start Tracking</button>
+        <button id="getDirections" onclick="navigateToGoogleMaps()" disabled>Get Directions</button>
+    </div>
+    
+    <script>
+        let map;
+        let marker;
+        let currentPosition = { lat: 0, lng: 0 };
+        let tracking = false;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 15,
+                center: currentPosition,
+                mapTypeId: 'roadmap'
+            });
+
+            marker = new google.maps.Marker({
+                position: currentPosition,
+                map: map,
+                title: "Your Location",
+                animation: google.maps.Animation.BOUNCE
+            });
+        }
+
+        function updateLocation(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            currentPosition = { lat, lng };
+
+            marker.setPosition(currentPosition);
+            map.setCenter(currentPosition);
+            document.getElementById('coordinates').textContent = `Latitude: ${lat.toFixed(5)} | Longitude: ${lng.toFixed(5)}`;
+        }
+
+        function trackLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(updateLocation, 
+                    error => console.error('Error getting location:', error), 
+                    { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+                );
+                document.getElementById('getDirections').disabled = false;
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function navigateToGoogleMaps() {
+            window.location.href = `https://www.google.com/maps/dir/?api=1&destination=${currentPosition.lat},${currentPosition.lng}`;
+        }
+
+        document.getElementById('startTracking').addEventListener('click', function() {
+            if (!tracking) {
+                trackLocation();
+                tracking = true;
+                this.disabled = true;
+            }
+        });
+
+        window.onload = function () {
+            initMap();
+        };
+    </script>
+</body>
+</html>
